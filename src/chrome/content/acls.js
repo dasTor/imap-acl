@@ -90,6 +90,13 @@ if ("undefined" == typeof(ImapAclExt.Aclist)) {
 		document.getElementById("status_label").value =  this._stringBundle.getString("loadingDone");
 	},
 
+	click : function(event) {
+        // we only care about button 0 (left click) double click events
+		if (event.button != 0 || event.detail != 2 || event.originalTarget.localName != "listitem")
+		    return;
+		this.change();
+	},
+
 	change : function() {
 		var selected = this._userList.selectedIndex;
 		

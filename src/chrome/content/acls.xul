@@ -19,7 +19,7 @@
 	<label id="foldername_label" value=''/>
 	<hbox>
 		<vbox flex="1">
-			<listbox id="user_list" flex="1">
+			<listbox id="user_list" onclick="ImapAclExt.Aclist.click(event)" flex="1">
 				<listhead>
 					<listheader label="&extensions.ImapAclExt.user;"/>
 					<listheader label="&extensions.ImapAclExt.rights;"/>

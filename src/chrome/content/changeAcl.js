@@ -29,7 +29,8 @@ if ("undefined" == typeof(ImapAclExt.ChangeAcl)) {
 		{
 			document.title=this._stringBundle.getString("setRightsFor") + ": " + selected.username;
 			usernameBox.value = selected.username;
-			usernameBox.disabled = "true";
+			usernameBox.setAttribute("readonly", true);
+			//usernameBox.disabled = "true";
 			
 			var uacl = selected.permissions;
 			
@@ -307,7 +308,4 @@ if ("undefined" == typeof(ImapAclExt.ChangeAcl)) {
 		}
 	}
   };
-  (function() {
-		this.init();
-  }).apply(ImapAclExt.ChangeAcl);
 };

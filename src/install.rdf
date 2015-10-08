@@ -3,6 +3,7 @@
   <Description about="urn:mozilla:install-manifest">
     <em:id>imap-acl@sirphreak.com</em:id>
     <em:type>2</em:type>
+    <em:unpack>false</em:unpack>
     <em:name>Imap-ACL-Extension</em:name>
     <em:version>0.2.7</em:version>
     <em:creator>Daniel Stoye</em:creator>
@@ -13,8 +14,8 @@
     <em:targetApplication>
       <Description>
         <em:id>{3550f703-e582-4d05-9a08-453d09bdfdc6}</em:id> <!-- Thunderbird -->
-        <em:minVersion>3.0</em:minVersion>
-        <em:maxVersion>20.*</em:maxVersion>
+        <em:minVersion>24.0</em:minVersion>
+        <em:maxVersion>99.*</em:maxVersion>
       </Description>
     </em:targetApplication>
   </Description>

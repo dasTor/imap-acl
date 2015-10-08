@@ -6,3 +6,4 @@ cd ../src
 mv chrome/content/debug.js debug.js
 zip -r ../bin/Imap-ACL-Extension-0.2.7.xpi chrome/ chrome.manifest defaults/ install.rdf
 mv debug.js chrome/content/debug.js
+cp ../bin/Imap-ACL-Extension-0.2.7.xpi ~/.thunderbird/*/extensions/imap-acl@sirphreak.com.xpi

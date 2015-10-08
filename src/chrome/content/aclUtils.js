@@ -12,8 +12,11 @@ if ("undefined" == typeof(ImapAclExt)) {
 	Cu : Components.utils,
 
 	getSubFoldersAsArray : function (imapFolder, folders) {
-		let allFolders = this.Cc["@mozilla.org/supports-array;1"].createInstance(this.Ci.nsISupportsArray);
-		imapFolder.ListDescendents(allFolders);
+		// SG, 07.10.2015 - TB24 changed from nsISupportsArray to nsIMutableArray, and fix typo ListDescendants
+		//                  https://developer.mozilla.org/en-US/docs/Mozilla/Thunderbird/Releases/24
+		//let allFolders = this.Cc["@mozilla.org/supports-array;1"].createInstance(this.Ci.nsISupportsArray);
+		let allFolders = this.Cc["@mozilla.org/array;1"].createInstance(this.Ci.nsIMutableArray);
+		imapFolder.ListDescendants(allFolders);
 		
 		for each (var folder in fixIterator(allFolders, this.Ci.nsIMsgFolder)) {
 			var imapF = folder.QueryInterface(Components.interfaces.nsIMsgImapMailFolder);
@@ -64,6 +67,7 @@ if ("undefined" == typeof(ImapAclExt)) {
 	check : function (imapFolder, callback, cbSender) {
 		
 		if (imapFolder instanceof Array && imapFolder.length > 0) {
+			// SG, 07.10.2015 - working, but why not using otherCommands?
 			var commands = new Array();
 			for (var i = 0; i < imapFolder.length; ++i) {
 				commands.push("cmd00" + i +  " GETACL \"" + imapFolder[i].onlineName + "\"");
@@ -145,42 +149,69 @@ if ("undefined" == typeof(ImapAclExt)) {
 		
 		cbSender.parseCheck(cbSender, aclRes, cb, cbS, imapFolder);
 	},
-	parseCheck : function (cbSender, aclRes, cb, cbS, imapFolder) {	
+	parseCheck : function (cbSender, aclRes, cb, cbS, imapFolder) {
+		//dump("parseCheck(aclRes = "+aclRes+")\n");
 		if (aclRes == "" || aclRes.indexOf(" OK ") < 0) {
 			//window.dump("isChecked "+ imapFolder.onlineName + "\\\\" + cbSender.checkedCounter + "//" + aclRes.indexOf("\n") + result+"\n");
 			cb(cbS, "", imapFolder);
 		}
 				
-		if (aclRes.indexOf("\n") >= 0) {
-			aclRes = aclRes.split("\n")[0];
-		}
-
-		if (aclRes.indexOf("* ") == 0) {
-			aclRes = aclRes.substr(2);
-		}
+		//if (aclRes.indexOf("* ") == 0) {
+		//    aclRes = aclRes.substr(2);
+		//}
+		//
+		//if (aclRes.indexOf("ACL ") == 0) {
+		//    aclRes = aclRes.substr(4);
+		//}
+		//
+		//if (aclRes.indexOf(imapFolder.onlineName+" ") == 0) {
+		//    aclRes = aclRes.substr(imapFolder.onlineName.length+1);
+		//}
+		//
+		//if (aclRes.indexOf("\""+imapFolder.onlineName+"\" ") == 0) {
+		//    aclRes = aclRes.substr(imapFolder.onlineName.length+3);
+		//}
+		//
+		//var acls = aclRes.split(" ");
+		//var rights = new Array();
+		//
+		//for (var i=0;i<acls.length;i=i+2) {
+		//	var user = acls[i].replace(/"/g,"");
+		//	var acl = acls[i+1].replace(/"/g,"");
+		//	if (user != "owner" && user != imapFolder.server.realUsername) {
+		//		rights.push({username: user, permissions: acl});
+		//	}
+		//}
 		
-		if (aclRes.indexOf("ACL ") == 0) {
-			aclRes = aclRes.substr(4);
-		}
-		
-		if (aclRes.indexOf(imapFolder.onlineName+" ") == 0) {
-			aclRes = aclRes.substr(imapFolder.onlineName.length+1);
-		}
-
-		if (aclRes.indexOf("\""+imapFolder.onlineName+"\" ") == 0) {
-			aclRes = aclRes.substr(imapFolder.onlineName.length+3);
-		}
-
-		var acls = aclRes.split(" ");
+		// SG, 07.10.2015 - process all lines: 
+		// * ACL <folder> <user> <rights>
 		var rights = new Array();
+		var aclArr = aclRes.split("\n");
 		
-		for (var i=0;i<acls.length;i=i+2) {
-			var user = acls[i].replace(/"/g,"");
-			var acl = acls[i+1].replace(/"/g,"");
-			if (user != "owner" && user != imapFolder.server.realUsername) {
-				rights.push({username: user, permissions: acl});
+		for (var a=0;a<aclArr.length;a++) {
+			aclRes = aclArr[a];
+			//dump("\t\t"+aclRes+"\n");
+			
+			var acls = aclRes.split(" ");
+			
+			if ((acls.length > 4) && (acls[0] == "*") && (acls[1].toLowerCase() == "acl")) {
+				var numACL = 4;
+				if (acls[2].startsWith("\""))
+				    // folder may contain spaces, so search for the next with ending quote
+				    while ((numACL < acls.length) && !acls[numACL-2].endsWith("\""))
+					numACL++;
+				while (numACL < acls.length) {
+					var user = acls[numACL-1].replace(/"/g,"");
+					var acl = acls[numACL].replace(/"/g,"");
+					if (user != "owner" && user != imapFolder.server.realUsername) {
+					    rights.push({username: user, permissions: acl});
+					}
+					numACL += 2;
+				}
 			}
 		}
+		//dump("parseCheck found "+rights.length+" ACLs for "+imapFolder.onlineName+"\n");
+
 		cb(cbS, rights, imapFolder);
 	},
 	

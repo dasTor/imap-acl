@@ -16,7 +16,7 @@
 	</stringbundleset>
 	<hbox>
 		<vbox flex="1">
-			<listbox id="folder_list" flex="1">
+			<listbox id="folder_list" onclick="ImapAclExt.AclOverview.click(event)" flex="1">
 				<listhead>
 					<listheader label="&extensions.ImapAclExt.account;"/>
 					<listheader label="&extensions.ImapAclExt.folder;"/>

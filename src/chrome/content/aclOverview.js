@@ -42,8 +42,12 @@ if ("undefined" == typeof(ImapAclExt.AclOverview)) {
 				if (rootFolder.canOpenFolder && incomingServer.realUsername.length > 0 && incomingServer.password.length > 0) {
 					var folderForAcc = new Array();
 					
-					let allFolders = this.Cc["@mozilla.org/supports-array;1"].createInstance(this.Ci.nsISupportsArray);
-					rootFolder.ListDescendents(allFolders);
+					// SG, 07.10.2015 - TB24 changed from nsISupportsArray to nsIMutableArray, and fix typo ListDescendants
+					//                  https://developer.mozilla.org/en-US/docs/Mozilla/Thunderbird/Releases/24
+					//let allFolders = this.Cc["@mozilla.org/supports-array;1"].createInstance(this.Ci.nsISupportsArray);
+					let allFolders = this.Cc["@mozilla.org/array;1"].createInstance(this.Ci.nsIMutableArray);
+					rootFolder.ListDescendants(allFolders);
+					//window.alert(allFolders.length);
 					//window.alert(allFolders.Count());
 				
 					for each (var folder in fixIterator(allFolders, this.Ci.nsIMsgFolder)) {
@@ -168,6 +172,13 @@ if ("undefined" == typeof(ImapAclExt.AclOverview)) {
 		this._returnCounter = 0;
 		this.buildList();
 		//document.getElementById("status_label").value =  this._stringBundle.getString("loadingDone");
+	},
+
+	click : function(event) {
+		// we only care about button 0 (left click) double click events
+		if (event.button != 0 || event.detail != 2 || event.originalTarget.localName != "listitem")
+		    return;
+		this.change();
 	},
 
 	change : function() {
