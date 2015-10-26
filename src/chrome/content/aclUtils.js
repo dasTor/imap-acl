@@ -149,64 +149,74 @@ if ("undefined" == typeof(ImapAclExt)) {
 		
 		cbSender.parseCheck(cbSender, aclRes, cb, cbS, imapFolder);
 	},
+	splitargs : function (input, separator, keepQuotes) {
+		// source: https://github.com/elgs/splitargs
+		separator = separator || /\s/g;
+		var singleQuoteOpen = false;
+		var doubleQuoteOpen = false;
+		var tokenBuffer = [];
+		var ret = [];
+
+		var arr = input.split('');
+		for (var i = 0; i < arr.length; ++i) {
+			var element = arr[i];
+			var matches = element.match(separator);
+			if (element === "'" && !doubleQuoteOpen) {
+				if (keepQuotes === true) {
+					tokenBuffer.push(element);
+				}
+				singleQuoteOpen = !singleQuoteOpen;
+				continue;
+			} else if (element === '"' && !singleQuoteOpen) {
+				if (keepQuotes === true) {
+					tokenBuffer.push(element);
+				}
+				doubleQuoteOpen = !doubleQuoteOpen;
+				continue;
+			}
+
+			if (!singleQuoteOpen && !doubleQuoteOpen && matches) {
+				if (tokenBuffer && tokenBuffer.length > 0) {
+					ret.push(tokenBuffer.join(''));
+					tokenBuffer = [];
+				} else {
+					ret.push('');
+				}
+			} else {
+				tokenBuffer.push(element);
+			}
+		}
+		if (tokenBuffer && tokenBuffer.length > 0) {
+			ret.push(tokenBuffer.join(''));
+		} else {
+			ret.push('');
+		}
+		return ret;
+	},
 	parseCheck : function (cbSender, aclRes, cb, cbS, imapFolder) {
 		//dump("parseCheck(aclRes = "+aclRes+")\n");
 		if (aclRes == "" || aclRes.indexOf(" OK ") < 0) {
 			//window.dump("isChecked "+ imapFolder.onlineName + "\\\\" + cbSender.checkedCounter + "//" + aclRes.indexOf("\n") + result+"\n");
 			cb(cbS, "", imapFolder);
 		}
-				
-		//if (aclRes.indexOf("* ") == 0) {
-		//    aclRes = aclRes.substr(2);
-		//}
-		//
-		//if (aclRes.indexOf("ACL ") == 0) {
-		//    aclRes = aclRes.substr(4);
-		//}
-		//
-		//if (aclRes.indexOf(imapFolder.onlineName+" ") == 0) {
-		//    aclRes = aclRes.substr(imapFolder.onlineName.length+1);
-		//}
-		//
-		//if (aclRes.indexOf("\""+imapFolder.onlineName+"\" ") == 0) {
-		//    aclRes = aclRes.substr(imapFolder.onlineName.length+3);
-		//}
-		//
-		//var acls = aclRes.split(" ");
-		//var rights = new Array();
-		//
-		//for (var i=0;i<acls.length;i=i+2) {
-		//	var user = acls[i].replace(/"/g,"");
-		//	var acl = acls[i+1].replace(/"/g,"");
-		//	if (user != "owner" && user != imapFolder.server.realUsername) {
-		//		rights.push({username: user, permissions: acl});
-		//	}
-		//}
-		
-		// SG, 07.10.2015 - process all lines: 
-		// * ACL <folder> <user> <rights>
+
+		// SG, 07.10.2015 - not only process first, but all lines 
+		// * ACL <folder> <user1> <rights1> <user2> <rights2> <user3> <rights3>
 		var rights = new Array();
-		var aclArr = aclRes.split("\n");
-		
-		for (var a=0;a<aclArr.length;a++) {
-			aclRes = aclArr[a];
-			//dump("\t\t"+aclRes+"\n");
-			
-			var acls = aclRes.split(" ");
-			
-			if ((acls.length > 4) && (acls[0] == "*") && (acls[1].toLowerCase() == "acl")) {
-				var numACL = 4;
-				if (acls[2].startsWith("\""))
-				    // folder may contain spaces, so search for the next with ending quote
-				    while ((numACL < acls.length) && !acls[numACL-2].endsWith("\""))
-					numACL++;
-				while (numACL < acls.length) {
-					var user = acls[numACL-1].replace(/"/g,"");
-					var acl = acls[numACL].replace(/"/g,"");
-					if (user != "owner" && user != imapFolder.server.realUsername) {
-					    rights.push({username: user, permissions: acl});
+		var aclLine = aclRes.split("\n");
+
+		for (var a=0;a<aclLine.length;a++) {
+			//dump("\t\t"+aclLine[a]);
+			var acls = this.splitargs(aclLine[a], null, false);
+			var currACL = 4;
+			if ((acls[0] == "*") && (acls[1].toLowerCase() == "acl")) {
+				while (acls.length > currACL) {
+					// SG, 07.10.2015 - TODO: find correct owner
+					// (but ACL may return complete mail address when realUsername misses domain)
+					if (acls[currACL-1] != "owner" && acls[currACL-1] != imapFolder.server.realUsername) {
+						rights.push({username: acls[currACL-1], permissions: acls[currACL]});
 					}
-					numACL += 2;
+					currACL += 2;
 				}
 			}
 		}
@@ -322,9 +332,9 @@ if ("undefined" == typeof(ImapAclExt)) {
 					let inputData = instream.read(count);
 
 					if (starttlsMode && inputData.indexOf("a001") == 0 && inputData.indexOf("OK") != -1) {
-                                                transport.securityInfo.StartTLS();
+						transport.securityInfo.StartTLS();
 						startedtlsMode = true;
-                                        }					
+					}					
 					this.data.push(inputData);
 					
 					if (index < protocolData.length && index > 0 && starttlsMode && !startedtlsMode) {
@@ -343,13 +353,13 @@ if ("undefined" == typeof(ImapAclExt)) {
 					   .createInstance(this.Ci.nsIInputStreamPump);
 
 			pump.init(stream, -1, -1, 0, 0, true);
-                        let thread = this.Cc["@mozilla.org/thread-manager;1"].getService().currentThread;
-                       
-                        var countdown = 0;
-                        while(starttlsMode && transport.securityInfo == null && countdown++ < this.COMMANDTIMEOUT) {
-                                thread.processNextEvent(true);
-                                window.dump("CONNECT waiting: " + countdown + "\n");
-                        }
+			let thread = this.Cc["@mozilla.org/thread-manager;1"].getService().currentThread;
+
+			var countdown = 0;
+			while(starttlsMode && transport.securityInfo == null && countdown++ < this.COMMANDTIMEOUT) {
+				thread.processNextEvent(true);
+				window.dump("CONNECT waiting: " + countdown + "\n");
+			}
 
 			if (starttlsMode) {
 				transport.securityInfo.QueryInterface(this.Ci.nsISSLSocketControl);
