@@ -32,7 +32,7 @@ if ("undefined" == typeof(ImapAclExt.AclOverview)) {
 		var gAccountManager = Components.classes["@mozilla.org/messenger/account-manager;1"].getService(Components.interfaces.nsIMsgAccountManager);
 		var folders = new Array();
 		
-		for (var account in fixIterator(gAccountManager.accounts, this.Ci.nsIMsgAccount)) {
+		for (let account of fixIterator(gAccountManager.accounts, this.Ci.nsIMsgAccount)) {
 			var incomingServer = account.incomingServer.QueryInterface(Components.interfaces.nsIMsgIncomingServer);
 			var root = incomingServer.rootFolder.QueryInterface(Components.interfaces.nsIMsgFolder);
 			if (incomingServer.type == "imap" && root.hasSubFolders) {
