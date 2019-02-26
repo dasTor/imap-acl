@@ -352,7 +352,7 @@ if ("undefined" == typeof(ImapAclExt)) {
 			var pump = this.Cc["@mozilla.org/network/input-stream-pump;1"]
 					   .createInstance(this.Ci.nsIInputStreamPump);
 
-			pump.init(stream, -1, -1, 0, 0, true);
+			pump.init(stream, 0, 0, true);
 			let thread = this.Cc["@mozilla.org/thread-manager;1"].getService().currentThread;
 
 			var countdown = 0;
