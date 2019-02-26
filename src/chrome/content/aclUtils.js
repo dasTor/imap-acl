@@ -18,7 +18,7 @@ if ("undefined" == typeof(ImapAclExt)) {
 		let allFolders = this.Cc["@mozilla.org/array;1"].createInstance(this.Ci.nsIMutableArray);
 		imapFolder.ListDescendants(allFolders);
 		
-		for each (var folder in fixIterator(allFolders, this.Ci.nsIMsgFolder)) {
+		for (let folder of fixIterator(allFolders, this.Ci.nsIMsgFolder)) {
 			var imapF = folder.QueryInterface(Components.interfaces.nsIMsgImapMailFolder);
 			
 			if (imapF.canOpenFolder) {

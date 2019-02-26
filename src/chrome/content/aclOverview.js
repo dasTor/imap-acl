@@ -50,7 +50,7 @@ if ("undefined" == typeof(ImapAclExt.AclOverview)) {
 					//window.alert(allFolders.length);
 					//window.alert(allFolders.Count());
 				
-					for each (var folder in fixIterator(allFolders, this.Ci.nsIMsgFolder)) {
+					for (let folder of fixIterator(allFolders, this.Ci.nsIMsgFolder)) {
 						var imapF = folder.QueryInterface(Components.interfaces.nsIMsgImapMailFolder);
 						
 						if (imapF.canOpenFolder) {
