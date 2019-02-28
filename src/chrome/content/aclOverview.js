@@ -128,7 +128,7 @@ if ("undefined" == typeof(ImapAclExt.AclOverview)) {
 				
 					item.value = username;
 					//window.dump(ImapAclExt.Debug.var_dump(rights));
-					item.aclValue = rights[0];
+					item.aclValue = rights[i];
 					item.imapFolder = imapFolder;
 				} else {
 					accNameCell.setAttribute("label", rights[0]);
