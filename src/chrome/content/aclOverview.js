@@ -32,7 +32,7 @@ if ("undefined" == typeof(ImapAclExt.AclOverview)) {
 		var gAccountManager = Components.classes["@mozilla.org/messenger/account-manager;1"].getService(Components.interfaces.nsIMsgAccountManager);
 		var folders = new Array();
 		
-		for (var account in fixIterator(gAccountManager.accounts, this.Ci.nsIMsgAccount)) {
+		for (let account of fixIterator(gAccountManager.accounts, this.Ci.nsIMsgAccount)) {
 			var incomingServer = account.incomingServer.QueryInterface(Components.interfaces.nsIMsgIncomingServer);
 			var root = incomingServer.rootFolder.QueryInterface(Components.interfaces.nsIMsgFolder);
 			if (incomingServer.type == "imap" && root.hasSubFolders) {
@@ -50,7 +50,7 @@ if ("undefined" == typeof(ImapAclExt.AclOverview)) {
 					//window.alert(allFolders.length);
 					//window.alert(allFolders.Count());
 				
-					for each (var folder in fixIterator(allFolders, this.Ci.nsIMsgFolder)) {
+					for (let folder of fixIterator(allFolders, this.Ci.nsIMsgFolder)) {
 						var imapF = folder.QueryInterface(Components.interfaces.nsIMsgImapMailFolder);
 						
 						if (imapF.canOpenFolder) {
@@ -128,7 +128,7 @@ if ("undefined" == typeof(ImapAclExt.AclOverview)) {
 				
 					item.value = username;
 					//window.dump(ImapAclExt.Debug.var_dump(rights));
-					item.aclValue = rights[0];
+					item.aclValue = rights[i];
 					item.imapFolder = imapFolder;
 				} else {
 					accNameCell.setAttribute("label", rights[0]);
