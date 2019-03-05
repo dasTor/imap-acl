@@ -5,7 +5,7 @@
     <em:type>2</em:type>
     <em:unpack>false</em:unpack>
     <em:name>Imap-ACL-Extension</em:name>
-    <em:version>0.2.7</em:version>
+    <em:version>0.2.8</em:version>
     <em:creator>Daniel Stoye</em:creator>
     <em:contributor></em:contributor>
     <em:description>Extension to manage ACLs on Imap Servers</em:description>

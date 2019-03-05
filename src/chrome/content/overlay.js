@@ -2,7 +2,7 @@ if ("undefined" == typeof(ImapAclExt)) {
   var ImapAclExt = {
 	Cc : Components.classes,
 	Ci : Components.interfaces,  
-	IAE_VERSION : "0.2.7",
+	IAE_VERSION : "0.2.8",
 	_stringBundle : null,
 	_pref : null,
 	
